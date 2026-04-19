@@ -33,12 +33,12 @@ Andmebaasi struktuur koosneb neljast põhitabelist:
 
 `loan_application` - laenutaotlus, igal kliendil saab olla ainult üks aktiivne taotlus
 
-`payment_schedule` - maksegraafik, igal taotlusel saab olla ainult üks graafik.
+`payment_schedule` - maksegraafik, igal taotlusel saab olla ainult üks graafik
 
 `payment_schedule_item` - maksegraafiku kuumaksed
 
 Lisaks on table `system_parameter`, kus saab muuta maksimaalset kliendi
-vanust ja 6 kuu Euribori väärtust
+vanust ja 6 kuu Euribori väärtust.
 Tabelitel on andmebaasi tasemel kontrollid, näiteks unikaalne indeks, mis lubab kilendi kohta ühte aktiivset taotlust korraga.
 
 ## API ülevaade

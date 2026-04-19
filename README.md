@@ -24,6 +24,7 @@ Rakendus käivitub pordil 8080
 http://localhost:8080/swagger-ui/index.html
 ## Kasutajaliides
 http://localhost:8080/index.html
+
 Kasutajaliides on loodud täiesti AI-ga. See pole lisatud lisapunkti saamiseks, vaid et kodutöö hindamisel oleks lisa viis mugavaks testimiseks.
 ## Andmebaas
 Andmebaasi struktuur koosneb neljast põhitabelist:

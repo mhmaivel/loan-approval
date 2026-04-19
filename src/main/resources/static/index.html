@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Loan Application</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f9f9f9;
+            color: #111;
+            min-height: 100vh;
+        }
+
+        header {
+            background: #fff;
+            border-bottom: 1px solid #e5e5e5;
+            padding: 16px 32px;
+        }
+        .logo { font-weight: 600; font-size: 15px; }
+        .logo span { color: #2563eb; }
+
+        .steps {
+            display: flex;
+            padding: 0 32px;
+            background: #fff;
+            border-bottom: 1px solid #e5e5e5;
+        }
+        .step {
+            padding: 12px 0;
+            margin-right: 28px;
+            font-size: 12px;
+            color: #aaa;
+            border-bottom: 2px solid transparent;
+            display: flex;
+            align-items: center;
+            gap: 7px;
+        }
+        .step.active { color: #2563eb; border-bottom-color: #2563eb; }
+        .step-num {
+            width: 18px; height: 18px;
+            border-radius: 50%;
+            border: 1.5px solid currentColor;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 9px;
+        }
+        .step.active .step-num { background: #2563eb; border-color: #2563eb; color: #fff; }
+        .step.done   .step-num { background: #888;    border-color: #888;    color: #fff; }
+
+        main { max-width: 560px; margin: 48px auto; padding: 0 20px; }
+
+        h1   { font-size: 22px; font-weight: 600; margin-bottom: 4px; }
+        .sub { font-size: 13px; color: #888; margin-bottom: 28px; }
+
+        .card {
+            background: #fff;
+            border: 1px solid #e5e5e5;
+            border-radius: 8px;
+            padding: 24px;
+            margin-bottom: 16px;
+        }
+        .card-label {
+            font-size: 11px; font-weight: 600;
+            letter-spacing: 0.07em; text-transform: uppercase;
+            color: #aaa; margin-bottom: 14px;
+        }
+
+        .field { margin-bottom: 14px; }
+        .field:last-child { margin-bottom: 0; }
+        label { display: block; font-size: 12px; font-weight: 500; color: #555; margin-bottom: 5px; }
+        input, select {
+            width: 100%; border: 1px solid #ddd; border-radius: 6px;
+            padding: 9px 12px; font-family: 'Inter', sans-serif;
+            font-size: 14px; color: #111; outline: none;
+            transition: border-color 0.15s; background: #fff;
+        }
+        input:focus, select:focus { border-color: #2563eb; }
+        input.err { border-color: #ef4444; }
+        .err-msg { font-size: 11px; color: #ef4444; margin-top: 4px; display: none; }
+        .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+        .alert {
+            padding: 11px 14px; border-radius: 6px;
+            font-size: 13px; margin-bottom: 16px; display: none;
+        }
+        .alert.show { display: block; }
+        .alert-error   { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
+
+        .btn {
+            font-family: 'Inter', sans-serif; font-size: 13px;
+            font-weight: 500; padding: 10px 20px;
+            border: none; border-radius: 6px; cursor: pointer;
+            transition: opacity 0.15s;
+        }
+        .btn:hover    { opacity: 0.85; }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn-primary { background: #2563eb; color: #fff; }
+        .btn-danger  { background: #dc2626; color: #fff; }
+        .btn-ghost   { background: transparent; color: #555; border: 1px solid #ddd; }
+        .btn-row     { display: flex; gap: 10px; }
+
+        .data-row {
+            display: flex; justify-content: space-between;
+            font-size: 13px; padding: 7px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .data-row:last-child { border-bottom: none; }
+        .data-key { color: #888; }
+        .data-val { font-weight: 500; }
+
+        .badge { display: inline-block; padding: 2px 10px; border-radius: 20px; font-size: 11px; font-weight: 500; }
+        .badge-submitted { background: #fef9c3; color: #854d0e; }
+        .badge-in_review { background: #eff6ff; color: #1d4ed8; }
+        .badge-approved  { background: #f0fdf4; color: #15803d; }
+        .badge-rejected  { background: #fef2f2; color: #dc2626; }
+
+        .tbl-wrap { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; font-size: 12px; }
+        th {
+            text-align: right; padding: 8px 10px;
+            font-size: 10px; font-weight: 600;
+            letter-spacing: 0.06em; text-transform: uppercase;
+            color: #888; border-bottom: 1px solid #e5e5e5;
+        }
+        th:first-child { text-align: left; }
+        td { padding: 7px 10px; text-align: right; border-bottom: 1px solid #f4f4f4; }
+        td:first-child { text-align: left; color: #888; }
+        tfoot td { font-weight: 600; border-top: 1px solid #e5e5e5; border-bottom: none; background: #fafafa; }
+
+        .overlay {
+            display: none; position: fixed; inset: 0;
+            background: rgba(0,0,0,0.3); z-index: 50;
+            align-items: center; justify-content: center;
+        }
+        .overlay.show { display: flex; }
+        .modal {
+            background: #fff; border-radius: 10px; padding: 28px;
+            width: 340px; box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+        }
+        .modal h3 { font-size: 16px; margin-bottom: 6px; }
+        .modal p  { font-size: 13px; color: #888; margin-bottom: 18px; }
+
+        .result { text-align: center; padding: 48px 0; display: none; }
+        .result-icon { font-size: 40px; margin-bottom: 14px; }
+        .result h2 { font-size: 20px; margin-bottom: 6px; }
+        .result p  { font-size: 13px; color: #888; margin-bottom: 24px; }
+
+        .view { display: none; }
+        .view.active { display: block; }
+
+        .spin {
+            display: inline-block; width: 12px; height: 12px;
+            border: 2px solid rgba(255,255,255,0.4); border-top-color: #fff;
+            border-radius: 50%; animation: spin 0.5s linear infinite;
+            vertical-align: middle; margin-right: 5px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+<header><div class="logo"><span>Loan</span></div></header>
+
+<div class="steps">
+    <div class="step active" id="step1"><div class="step-num">1</div> Application</div>
+    <div class="step"        id="step2"><div class="step-num">2</div> Payment Schedule</div>
+    <div class="step"        id="step3"><div class="step-num">3</div> Review</div>
+</div>
+
+<main>
+
+    <!-- VIEW 1: FORM -->
+    <div class="view active" id="view1">
+        <h1>Submit Application</h1>
+        <p class="sub">Fill in all fields</p>
+        <div id="a1" class="alert alert-error"></div>
+        <div class="card">
+            <div class="row2">
+                <div class="field">
+                    <label>First Name</label>
+                    <input id="firstName" type="text" maxlength="32" placeholder="Marta"/>
+                    <div class="err-msg" id="e-firstName">Required</div>
+                </div>
+                <div class="field">
+                    <label>Last Name</label>
+                    <input id="lastName" type="text" maxlength="32" placeholder="Kivi"/>
+                    <div class="err-msg" id="e-lastName">Required</div>
+                </div>
+            </div>
+            <div class="field">
+                <label>ID Code</label>
+                <input id="idCode" type="text" maxlength="11" placeholder="38001085718"/>
+                <div class="err-msg" id="e-idCode">Invalid ID code (11 digits)</div>
+            </div>
+            <div class="field">
+                <label>Loan Amount (€)</label>
+                <input id="loanAmount" type="number" min="5000" placeholder="5000"/>
+                <div class="err-msg" id="e-loanAmount">Minimum 5,000 €</div>
+            </div>
+            <div class="row2">
+                <div class="field">
+                    <label>Duration (months)</label>
+                    <input id="loanLengthMonths" type="number" min="6" max="360" placeholder="6"/>
+                    <div class="err-msg" id="e-loanLengthMonths">6–360 months</div>
+                </div>
+                <div class="field">
+                    <label>Interest Margin (%)</label>
+                    <input id="interestMargin" type="number" min="0" step="0.001" placeholder="2.5"/>
+                    <div class="err-msg" id="e-interestMargin">Min 0</div>
+                </div>
+            </div>
+        </div>
+        <button class="btn btn-primary" id="btn1" onclick="submitLoan()">Submit Application</button>
+    </div>
+
+    <!-- VIEW 2: GENERATE -->
+    <div class="view" id="view2">
+        <h1>Payment Schedule</h1>
+        <p class="sub">Application submitted successfully</p>
+        <div id="a2" class="alert alert-error"></div>
+        <div class="card">
+            <div class="card-label">Application Details</div>
+            <div id="loanRows"></div>
+        </div>
+        <button class="btn btn-primary" id="btn2" onclick="generateSchedule()">Generate Payment Schedule</button>
+    </div>
+
+    <!-- VIEW 3: REVIEW -->
+    <div class="view" id="view3">
+        <h1>Review</h1>
+        <p class="sub">Approve or reject</p>
+        <div id="a3" class="alert alert-error"></div>
+
+        <div id="reviewBody">
+            <div class="card">
+                <div class="card-label">Client</div>
+                <div id="clientRows"></div>
+            </div>
+            <div class="card">
+                <div class="card-label">Payment Schedule</div>
+                <div class="tbl-wrap">
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>#</th><th>Date</th><th>Payment €</th>
+                            <th>Interest €</th><th>Principal €</th><th>Balance €</th>
+                        </tr>
+                        </thead>
+                        <tbody id="tBody"></tbody>
+                        <tfoot id="tFoot"></tfoot>
+                    </table>
+                </div>
+            </div>
+            <div class="btn-row">
+                <button class="btn btn-primary" onclick="approveLoan()">✓ Approve</button>
+                <button class="btn btn-danger"  onclick="rejectLoan()">✗ Reject</button>
+            </div>
+        </div>
+
+        <div class="result" id="result">
+            <div class="result-icon" id="rIcon"></div>
+            <h2 id="rTitle"></h2>
+            <p  id="rMsg"></p>
+            <button class="btn btn-ghost" onclick="resetAll()">← New Application</button>
+        </div>
+    </div>
+
+</main>
+
+<script>
+    let S = { loanId: null, scheduleId: null, loan: null, schedule: null };
+
+    const fmt     = n => Number(n).toLocaleString('en-GB', {minimumFractionDigits:2, maximumFractionDigits:2});
+    const fmtDate = s => s ? s.substring(0,10) : '—';
+
+    function setStep(n) {
+        [1,2,3].forEach(i => {
+            document.getElementById('step'+i).className =
+                'step' + (i < n ? ' done' : i === n ? ' active' : '');
+        });
+        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+        document.getElementById('view'+n).classList.add('active');
+    }
+
+    function showAlert(id, msg) {
+        const el = document.getElementById(id);
+        el.textContent = msg;
+        el.className = 'alert alert-error show';
+    }
+    function clearAlert(id) { document.getElementById(id).className = 'alert alert-error'; }
+
+    function setLoading(id, on, label) {
+        const b = document.getElementById(id);
+        b.disabled = on;
+        b.innerHTML = on ? `<span class="spin"></span>${label}` : label;
+    }
+
+    function row(k, v) {
+        return `<div class="data-row"><span class="data-key">${k}</span><span class="data-val">${v}</span></div>`;
+    }
+
+    function badge(s) {
+        const map = { SUBMITTED:'Submitted', IN_REVIEW:'In Review', APPROVED:'Approved', REJECTED:'Rejected' };
+        return `<span class="badge badge-${(s||'').toLowerCase()}">${map[s]||s}</span>`;
+    }
+
+    // VALIDATE
+    function validate() {
+        let ok = true;
+        [
+            ['firstName',        v => v.trim().length > 0],
+            ['lastName',         v => v.trim().length > 0],
+            ['idCode',           v => /^\d{11}$/.test(v)],
+            ['loanAmount',       v => parseFloat(v) >= 5000],
+            ['loanLengthMonths', v => parseInt(v) >= 6 && parseInt(v) <= 360],
+            ['interestMargin',   v => v !== '' && parseFloat(v) >= 0],
+        ].forEach(([id, fn]) => {
+            const inp = document.getElementById(id);
+            const err = document.getElementById('e-'+id);
+            const valid = fn(inp.value);
+            inp.classList.toggle('err', !valid);
+            err.style.display = valid ? 'none' : 'block';
+            if (!valid) ok = false;
+        });
+        return ok;
+    }
+
+    // VIEW 1
+    async function submitLoan() {
+        clearAlert('a1');
+        if (!validate()) return;
+        setLoading('btn1', true, 'Submitting...');
+        try {
+            const res = await fetch('/loans', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    firstName:        document.getElementById('firstName').value.trim(),
+                    lastName:         document.getElementById('lastName').value.trim(),
+                    idCode:           document.getElementById('idCode').value.trim(),
+                    loanAmount:       parseFloat(document.getElementById('loanAmount').value),
+                    loanLengthMonths: parseInt(document.getElementById('loanLengthMonths').value),
+                    interestMargin:   parseFloat(document.getElementById('interestMargin').value),
+                })
+            });
+            const d = await res.json();
+            if (!res.ok) { showAlert('a1', d.message || 'Error submitting application'); return; }
+            S.loan = d;
+            if (d.status === 'REJECTED') {
+                setStep(3);
+                showResult('rejected', 'Application rejected', `Reason: ${d.rejectionReason}`);
+                return;
+            }
+            document.getElementById('loanRows').innerHTML = [
+                ['Name',              `${d.firstName} ${d.lastName}`],
+                ['ID Code',           d.idCode],
+                ['Loan Amount',       `${fmt(d.loanAmount)} €`],
+                ['Duration',          `${d.loanLengthMonths} months`],
+                ['Margin',            `${d.interestMargin}%`],
+                ['Euribor (6m)',      `${d.baseInterestRate}%`],
+                ['Status',            badge(d.status)],
+            ].map(([k,v]) => row(k,v)).join('');
+            setStep(2);
+        } catch(e) {
+            showAlert('a1', 'Connection error. Is the application running on port 8080?');
+        } finally {
+            setLoading('btn1', false, 'Submit Application');
+        }
+    }
+
+    // VIEW 2
+    async function generateSchedule() {
+        clearAlert('a2');
+        setLoading('btn2', true, 'Generating...');
+        try {
+            const loanId = S.loan.loanApplicationId;
+            S.loanId = loanId;
+            const res = await fetch(`/schedules/loan/${loanId}`, {
+                method: 'POST', headers: { 'Content-Type': 'application/json' }
+            });
+            const d = await res.json();
+            if (!res.ok) { showAlert('a2', d.message || 'Error'); return; }
+            S.schedule   = d;
+            S.scheduleId = d.paymentScheduleId;
+            renderReview(d);
+            setStep(3);
+        } catch(e) {
+            showAlert('a2', 'Connection error');
+        } finally {
+            setLoading('btn2', false, 'Generate payment schedule');
+        }
+    }
+
+    // VIEW 3
+    function renderReview(d) {
+        document.getElementById('clientRows').innerHTML = [
+            ['Name',            d.fullName],
+            ['ID Code',         d.idCode],
+            ['Loan Amount',     `${fmt(d.loanAmount)} €`],
+            ['Total Payment',   `${fmt(d.totalAmount)} €`],
+            ['Total Interest',  `${fmt(d.totalInterest)} €`],
+            ['First Payment',   fmtDate(d.firstPaymentDate)],
+            ['Last Payment',    fmtDate(d.lastPaymentDate)],
+        ].map(([k,v]) => row(k,v)).join('');
+
+        document.getElementById('tBody').innerHTML = (d.items||[]).map(i => `
+      <tr>
+        <td>${i.installmentNumber}</td>
+        <td>${fmtDate(i.paymentDate)}</td>
+        <td>${fmt(i.paymentAmount)}</td>
+        <td>${fmt(i.interestAmount)}</td>
+        <td>${fmt(i.principalAmount)}</td>
+        <td>${fmt(i.remainingPrincipal)}</td>
+      </tr>`).join('');
+
+        document.getElementById('tFoot').innerHTML = `
+      <tr>
+        <td colspan="2">Total</td>
+        <td>${fmt(d.totalAmount)}</td>
+        <td>${fmt(d.totalInterest)}</td>
+        <td>—</td><td>—</td>
+      </tr>`;
+
+        document.getElementById('reviewBody').style.display = 'block';
+        document.getElementById('result').style.display = 'none';
+    }
+
+    async function approveLoan() {
+        try {
+            const res = await fetch(`/schedules/${S.scheduleId}/approve`, {
+                method: 'POST', headers: { 'Content-Type': 'application/json' }
+            });
+            if (!res.ok) { const d = await res.json(); showAlert('a3', d.message||'Error'); return; }
+            showResult('approved', 'Loan approved', `First payment: ${fmtDate(S.schedule.firstPaymentDate)}`);
+        } catch(e) { showAlert('a3', 'Connection error'); }
+    }
+
+    async function rejectLoan() {
+        try {
+            const res = await fetch(`/schedules/${S.scheduleId}/reject?reason=MANUAL_REJECTION`, {
+                method: 'POST', headers: { 'Content-Type': 'application/json' }
+            });
+            if (!res.ok) { const d = await res.json(); showAlert('a3', d.message||'Viga'); return; }
+            showResult('rejected', 'Application rejected', 'Reason: MANUAL_REJECTION');
+        } catch(e) { showAlert('a3', 'Connection error'); }
+    }
+
+    function showResult(type, title, msg) {
+        document.getElementById('reviewBody').style.display = 'none';
+        const r = document.getElementById('result');
+        r.style.display = 'block';
+        document.getElementById('rIcon').textContent  = type === 'approved' ? '✅' : '❌';
+        document.getElementById('rTitle').textContent = title;
+        document.getElementById('rMsg').textContent   = msg;
+    }
+
+    function resetAll() {
+        S = { loanId: null, scheduleId: null, loan: null, schedule: null };
+        ['firstName','lastName','idCode','loanAmount','loanLengthMonths','interestMargin']
+            .forEach(id => { document.getElementById(id).value = ''; document.getElementById(id).classList.remove('err'); });
+        document.querySelectorAll('.err-msg').forEach(e => e.style.display = 'none');
+        clearAlert('a1'); clearAlert('a2'); clearAlert('a3');
+        setStep(1);
+    }
+</script>
+</body>
+</html>
